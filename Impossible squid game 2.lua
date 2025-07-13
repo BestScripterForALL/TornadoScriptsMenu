@@ -136,33 +136,35 @@ local function clearHighlights()
 end
 
 local function addHighlight(part, color)
-	local hl = Instance.new("Highlight", highlightFolder)
+	local hl = Instance.new("Highlight")
 	hl.Adornee = part
 	hl.FillColor = color
-	hl.OutlineColor = Color3.new(1, 1, 1)
+	hl.OutlineColor = Color3.new(1,1,1)
 	hl.FillTransparency = 0.3
 	hl.OutlineTransparency = 0
+	hl.Parent = highlightFolder
 end
 
 local function updateESP()
 	clearHighlights()
-	local segSys = workspace:FindFirstChild("segmentSystem")
-	if not segSys then return end
-	local segments = segSys:FindFirstChild("Segments")
+	local segments = workspace:FindFirstChild("segmentSystem") and workspace.segmentSystem:FindFirstChild("Segments")
 	if not segments then return end
 
 	for i = 1, math.huge do
-		local seg = segments:FindFirstChild("Segment" .. i)
-		if not seg then break end
-		local folder = seg:FindFirstChild("Folder")
+		local segment = segments:FindFirstChild("Segment" .. i)
+		if not segment then break end
+
+		local folder = segment:FindFirstChild("Folder")
 		if folder then
-			for _, part in ipairs(folder:GetChildren()) do
-				if part:IsA("BasePart") then
-					local br = part:FindFirstChild("breakable")
-					if br and br:IsA("BoolValue") then
-						if br.Value then
+			for _, part in pairs(folder:GetChildren()) do
+				if part:IsA("BasePart") and part:FindFirstChild("breakable") then
+					local value = part.breakable
+					if value:IsA("BoolValue") then
+						if value.Value == true then
+							part.BrickColor = BrickColor.Red()
 							addHighlight(part, Color3.fromRGB(255, 0, 0))
 						else
+							part.BrickColor = BrickColor.Green()
 							addHighlight(part, Color3.fromRGB(0, 255, 0))
 						end
 					end
